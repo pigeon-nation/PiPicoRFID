@@ -1,5 +1,8 @@
-# Base Code taken from https://github.com/wendlers/micropython-mfrc522
+ # Base Code taken from https://github.com/wendlers/micropython-mfrc522
 # Modified as per requirement by Saket Upadhyay for his undergraduate Capstone Project.
+
+# Modified by Pigeon Nation:
+# These tiny modifications make the program use software (bit-banged) SPI when the machine is not in the default hardware list.
 
 # The MIT License (MIT)
 # Copyright (c) 2016 Stefan Wendler
@@ -19,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from machine import Pin, SPI
+from machine import Pin, SPI, SoftSPI
 from os import uname
 
 
@@ -59,7 +62,8 @@ class MFRC522:
             self.spi = SPI(0, baudrate=1000000, sck=self.sck,
                            mosi=self.mosi, miso=self.miso)
         else:
-            raise RuntimeError("Unsupported platform")
+            # One of micropython's newer features - software SPI. This allows you to easily use SPI WITHOUT HARDWARE SPI, meaning we can completely forget about what machine this is running on (as long as it has pins), and leave the selecting to the user.
+            self.spi = SoftSPI(baudrate=1000000, polarity=0, phase=0, sck=self.sck, mosi=self.mosi, miso=self.miso)
 
         self.rst.value(1)
         self.init()
